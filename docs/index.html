@@ -379,7 +379,7 @@ the COVID-19 pandemic, there were over 229 million reported cases and
 405,000 attributable deaths to malaria.<sup>2</sup> The disease burden
 of malaria is largely concentrated in sub-Saharan Africa, as the region
 accounted for 94% of cases and 85% of recorded deaths in
-2019.<sup>3</sup> (REF 1)</p>
+2019.<sup>3</sup></p>
 </div>
 <div id="problem" class="section level1">
 <h1>Problem</h1>
@@ -419,7 +419,7 @@ blood test was preformed for the presence of the malaria parasite. Every
 additional blood smears were collected for testing. Anti-malarial
 medication was administered if a patient presented with a malaria
 positive diagnosis. Anopheles counts were collected monthy using
-mosquito traps and recorded for each household.<sup>4</sup> (REF2)</p>
+mosquito traps and recorded for each household.<sup>4</sup></p>
 </div>
 <div id="measures" class="section level2">
 <h2>Measures</h2>
@@ -459,7 +459,7 @@ response variable, presence of malaria diagnosis, the classification
 methods of logistic regression, KNN, quadratic discriminant analysis
 (QDA), DT, and RF will be used. Both the logistic regression and the LDA
 methods use a linear function as the decision boundary. While KNN and
-QDA use a quadratic decision boundary. (book reference). The logistic
+QDA use a quadratic decision boundary.<sup>4</sup> The logistic
 regression model uses a maximum likelihood estimator (MLE) to seek
 estimates for <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> so the predicted probability for
 the individuals is as close as possible to the observed status. The LDA
@@ -476,22 +476,22 @@ points and uses the value to classify the the unseen observation. To fit
 the KNN model, we will first determine the K value with the lowest test
 error by running all possible K values from 1 to 100 varying by 5. Then
 we will use this model to compare against the QDA, LDA, and Logistic
-classification models. (REF3) Moreover, Decision Trees will be applied
-as they are easy to interpret, do not require mathematical formula for
-communication and they can be easily displayed graphically. They
-represent decisions of predictions as features in a tree-like structure.
-They consider all the possible features for prediction. The best feature
-to split the node on at each step is selected using the Gini Index, also
-known as node purity. To predict the primary outcome, the mean of the
-training observations is used in the region to which it belongs. To
-predict the secondary outcome, the mode of these training observations
-is used. As trees do not generally have the great predictive accuracy
-and they suffer from high variance, ensemble methods such as Random
-Forest will also be applied for regression and classification. Unlike
-Decision Trees, when splitting trees in Random Forests, a random sample
-of m predictors is selected as split candidates from a complete set of p
-predictors and then the split is allowed to use only one of those m
-predictors.<sup>5</sup> (REF 3)</p>
+classification models.<sup>4</sup> Moreover, Decision Trees will be
+applied as they are easy to interpret, do not require mathematical
+formula for communication and they can be easily displayed graphically.
+They represent decisions of predictions as features in a tree-like
+structure. They consider all the possible features for prediction. The
+best feature to split the node on at each step is selected using the
+Gini Index, also known as node purity. To predict the primary outcome,
+the mean of the training observations is used in the region to which it
+belongs. To predict the secondary outcome, the mode of these training
+observations is used. As trees do not generally have the great
+predictive accuracy and they suffer from high variance, ensemble methods
+such as Random Forest will also be applied for regression and
+classification. Unlike Decision Trees, when splitting trees in Random
+Forests, a random sample of m predictors is selected as split candidates
+from a complete set of p predictors and then the split is allowed to use
+only one of those m predictors.<sup>5</sup></p>
 </div>
 <div id="model-evaluation" class="section level2">
 <h2>Model Evaluation</h2>
@@ -523,7 +523,7 @@ using the AUC, where a higher value indicates better model performance.
 From the best fitting model, variable selection will be preformed using
 forward step wise regression. Variable selection for the final model
 will be determined by evaluating the test error of each forward step
-wise model, with the lowest test error preferred. (REF3 )</p>
+wise model, with the lowest test error preferred.<sup>4</sup></p>
 </div>
 </div>
 <div id="results" class="section level1">
@@ -544,8 +544,7 @@ sub-county (34.42%), followed by the Kihihi (33.57%), and Walakubua
 least poor HWI category (35.91%), followed by the poorest (32.58%), and
 middle (31.51%) categories. The mean age was 11.26 years with a standard
 deviation of 14.68. The mean Anopheles count was 5.97 with a standard
-deviation of 27.91 Anopheles.<br />
-Model Results</p>
+deviation of 27.91 Anopheles.</p>
 </div>
 <div id="primary-outcome" class="section level2">
 <h2>Primary Outcome</h2>
@@ -655,13 +654,23 @@ aferomentioned methods.</p>
 <div id="references" class="section level1">
 <h1>References</h1>
 <ol style="list-style-type: decimal">
-<li>Talisuna A, Adibaku S, Dorsey G, Kamya MR, Rosenthal PJ. Malaria in
-Uganda: Challenges to control on the long road to elimination. II. the
-path forward. Acta Trop. 2012;121(3):196-201. <a href="doi:10.1016/j.actatropica.2011.06.013" class="uri">doi:10.1016/j.actatropica.2011.06.013</a></li>
-<li>PRISM ICEMR Cohort. Clinical epidemiology database web site. <a href="https://l2.clinepidb.org/ce.legacy/app/record/dataset/DS_0ad509829e#category:topic-" class="uri">https://l2.clinepidb.org/ce.legacy/app/record/dataset/DS_0ad509829e#category:topic-</a>
-0219-synonym . Published 2018. Accessed November 16, 2022.</li>
-<li>An Introduction to Statistical Learning with Applications in R
-Second Edition (need full book title)</li>
+<li>CDC. (2023). About Malaria. Centers for Disease Control and
+Prevention (CDC). Retrieved April 22 from <a href="https://www.cdc.gov/malaria/about/index.html#:~:text=Malaria%20is%20a%20serious%20and,%2C%20and%20flu%2Dlike%20illness">https://www.cdc.gov/malaria/about/index.html#:~:text=Malaria%20is%20a%20serious%20and,%2C%20and%20flu%2Dlike%20illness</a></li>
+<li>Cohort, P. I. (2018). Clinical epidemiology database web site. PRISM
+ICEMR Cohort. <a href="https://l2.clinepidb.org/ce.legacy/app/record/dataset/DS_0ad509829e#category:topic-0219-synonym">https://l2.clinepidb.org/ce.legacy/app/record/dataset/DS_0ad509829e#category:topic-0219-synonym</a></li>
+<li>Dao, F., Djonor, S. K., Ayin, C. T., Adu, G. A., Sarfo, B., Nortey,
+P., . . . Danso-Appiah, A. (2021). Burden of malaria in children under
+five and caregivers’ health-seeking behaviour for malaria-related
+symptoms in artisanal mining communities in Ghana. Parasit Vectors,
+14(1), 418. <a href="https://doi.org/10.1186/s13071-021-04919-8">https://doi.org/10.1186/s13071-021-04919-8</a><br />
+</li>
+<li>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). An
+Introduction to Statistical Learning with Applications in R (2nd Edition
+ed.). Springer.</li>
+<li>Talisuna, A., Adibaku, S., Dorsey, G., Kamya, M. R., &amp;
+Rosenthal, P. J. (2012). Malaria in Uganda: challenges to control on the
+long road to elimination. II. The path forward. Acta Trop, 121(3),
+196-201. <a href="https://doi.org/10.1016/j.actatropica.2011.06.013">https://doi.org/10.1016/j.actatropica.2011.06.013</a></li>
 </ol>
 <pre class="r"><code>setwd(&quot;~/Desktop/&quot;)
 data &lt;- read.csv(&quot;ML_data2.csv&quot;)
@@ -671,6 +680,7 @@ colnames(data)</code></pre>
 ##  [7] &quot;water&quot;                 &quot;hwi&quot;                   &quot;subcounty&quot;            
 ## [10] &quot;dwelling&quot;              &quot;Anopheles_count&quot;       &quot;previous_complication&quot;
 ## [13] &quot;time_since_treatment&quot;  &quot;event2&quot;                &quot;malaria_binary&quot;</code></pre>
+<pre class="r"><code>setwd(&quot;~/Documents/GitHub/Machine-Learning-in-Public-Health-/docs&quot;)</code></pre>
 <pre class="r"><code>data&lt;- data%&gt;%dplyr::select(-c(&quot;time_since_treatment&quot;, &quot;time_at_risk&quot;, &quot;medication_sum&quot;, &quot;X&quot;))
 data&lt;-na.omit(data)
 data$malaria_binary&lt;- as.factor(data$malaria_binary)</code></pre>
