@@ -1,0 +1,448 @@
+---
+title: "ML Final Project - Malaria Infections"
+author: 'Emma Risner (NetID: er3044), Karni Bedirian (NetID: kb3896), Madi Wall (msw9896)'
+date: "2023-05-8"
+output:
+  html_document: default
+  pdf_document: default
+bibliography: exportlist.bib
+csl: american-medical-association.csl
+---
+### Packages Used
+```{r, message=FALSE}
+library(r02pro)
+library(tidyverse)
+library(MASS)
+library(pROC)
+library(caret)
+library(janitor)
+library(leaps)
+library(ggplot2)
+library(tree)
+library(randomForest)
+```
+
+# Background
+Malaria is a serious and common infectious disease that is caused by a mosquito parasite.^1^ Those who contract Malaria typically exhibit flu-like symptoms including fever and chills. In 2019, before the COVID-19 pandemic, there were over 229 million reported cases and 405,000 attributable deaths to malaria.^2^ The disease burden of malaria is largely concentrated in sub-Saharan Africa, as the region accounted for 94% of cases and 85% of recorded deaths in 2019.^3^ (REF 1)
+
+# Problem
+With this analysis we have two aims:
+
+ 1. Predict the number of malaria positive events using linear regression, KNN, and LDA methods
+ 2. Predict presence of malaria positive event using logistic regression, KNN, LDA, QDA classification methods
+
+We hope to use machine learning techniques to develop a model that will allow us to predict the above. Such a model will allow public health professionals to promote earlier identification of Malaria and target prevention strategies and treatments to the areas that need it the most. 
+
+# Methods 
+## Data Source and Study Design 
+  The data used for this analysis is the Program for Resistance, Immunology, Surveillance and Modeling in Uganda (PRISM) data set. The PRISM study was a dynamic prospective cohort study with 1421 participants conducted from 2011-2017 in three sub-counties of Uganda.^4^ The study was conducted by the International Center of Excellence for Malaria Research with the goal of improving the understanding of malaria. A total of 300 households, 100 for each sub-county, were enrolled in the study if the participants met the following criteria: they were full time residents of the home, agreed to attend the scheduled clinic visits, at least one participant in the house was 6 months to 10 years old, they agreed not to take anti-malarial medication administered outside of the study, and had no intent of moving out of the sub-county. At enrollment, baseline household characteristics and medial information was collected and a blood test was preformed for the presence of the malaria parasite. Every 30 days the participant would attend a scheduled clinic visit where additional blood smears were collected for testing. Anti-malarial medication was administered if a patient presented with a malaria positive diagnosis. Anopheles counts were collected monthy using mosquito traps and recorded for each household.^4^ (REF2)
+
+## Measures
+  The main outcome of interest is a continuous variable, the number of malaria positive diagnoses a patient experienced throughout the time of the study. The secondary outcome of interest is a binary variable, the presence of any malaria positive diagnosis versus none. 
+  There were seven predictors of interest, household wealth index (HWI), age, sex, water source, dwelling type, Anopheles count, and sub-county. Household wealth index is a categorical variable with possible values of "poorest", "middle", and "least poor". Age is a continuous variable recorded in years as the age at study entry. Sex is biological sex and has possible values of "male" or "female". Water source is categorical variable denoted as either being "protected" or "unprotected". Dwelling type is a categorical variable and is either "traditional" or "modern". Modern homes were defined as either having wood, cement, or brick walls, a metal or tiled roof, and closed roof eaves. Anopheles count is a continuous variable and is the mean count of the monthly recorded value for each household. Sub-county is a categorical variable defined by the location of the household in "Walakuba", "Kihihi", and "Nagongera". 
+
+## Statistical Analysis 
+  Summary Statistics will be obtained for categorical variables by reporting the frequency a proportions, for continuous variables the mean and standard deviation (sd) will be reported. The outcome variables of interest will be plotted to evaluate the skewness of the primary outcome and the balance of the secondary outcome. 
+Model Building 
+  The data will be split randomly into 80% training and 20% testing data. Each of the following models will be fit with the training data and then the performance will be tested on the testing data. 
+  For the continous response variable, number of positive malaria events, parametrics and non-parametric methods will be used: Linear regression, linear discriminant analysis (LDA), K nearest neighbors (KNN) regression, Regression Decision Trees (DT), and Radnom Forests (RF). For the binary response variable, presence of malaria diagnosis, the classification methods of logistic regression, KNN, quadratic discriminant analysis (QDA), DT, and RF will be used. Both the logistic regression and the LDA methods use a linear function as the decision boundary. While KNN and QDA use a quadratic decision boundary. (book reference). The logistic regression model uses a maximum likelihood estimator (MLE) to seek estimates for $\beta_0$ and $\beta_1$ so the predicted probability for the individuals is as close as possible to the observed status. The LDA method assumes a multivariate Gaussian distribution where it is assumed that each predictor has a one dimensional normal distribution and uses a mean vector and common contrivance matrix. Similar to the LDA, the QDA method draws from a multivariate Gaussian distribution with a class specific mean vector and covariance matrix and uses Bayes' theorem to preform prediction. The key difference in the QDA versus the LDA is that the QDA assumes that each class has it's own covariance matrix. Finally, the KNN classifier is a non-parametric approach, as no assumptions are made regarding the decision boundary. The KNN identifies the K nearest points and uses the value to classify the the unseen observation. To fit the KNN model, we will first determine the K value with the lowest test error by running all possible K values from 1 to 100 varying by 5. Then we will use this model to compare against the QDA, LDA, and Logistic classification models. (REF3)
+ Moreover, Decision Trees will be applied as they are easy to interpret, do not require mathematical formula for communication and they can be easily displayed graphically. They represent decisions of predictions as features in a tree-like structure. They consider all the possible features for prediction. The best feature to split the node on at each step is selected using the Gini Index, also known as node purity. To predict the primary outcome, the mean of the training observations is used in the region to which it belongs. To predict the secondary outcome, the mode of these training observations is used.
+  As trees do not generally have the great predictive accuracy and they suffer from high variance, ensemble methods such as Random Forest will also be applied for regression and classification. Unlike Decision Trees, when splitting trees in Random Forests, a random sample of m predictors is selected as split candidates from a complete set of p predictors and then the split is allowed to use only one of those m predictors.^5^ (REF 3)
+
+## Model Evaluation 
+  In order to determine which regression method performed the best, we first use a validation set approach to determine the k number to use in the KNN model. Next, we will take the Mean Squared Error (MSE), Root Mean Squared Error (RMSE), and Mean Absolute Error (MAE) of each model type. Finally, we will create a weighted composite metric to select the best model. We weighted the errors as MAE (0.5), RMSE (0.25), and MSE (0.25) because we are most interested in avoiding false negatives in our predictions. Therefore, RMSE and MSE are not as important as MAE because they are more susceptible to outliers while MAE looks at the average magnitude, and thus is not as susceptible to underestimation. We will select the model with the lowest weighted composite metric as the best fitting model.
+  From the best fitting model, variable selection will be preformed using forward step wise Variable selection for the final model will be determined by evaluating the test error of each forward step wise model, with the lowest test error preferred.
+  In order to determine which classification method preformed the best, we will evaluate the area under the curve (AUC) for the receiver operating characteristic (ROC) curves for each model. The ROC curve is plotted by first calculating a confusion matrix to give the true positive rates (TPR) and false positive rates (FPR) for each method. The true positive rate is a proportion of the true prediction for the presence of any malaria diagnoses. The FPR is the proportion of all true negatives incorrectly categorized as positives, in this case those with no malaria positive diagnoses being categorized as having one. The curves are evaluated by using the AUC, where a higher value indicates better model performance. 
+  From the best fitting model, variable selection will be preformed using forward step wise regression. Variable selection for the final model will be determined by evaluating the test error of each forward step wise model, with the lowest test error preferred. (REF3 )
+  
+# Results
+## Summary Statistics
+  After removing participants with missing data the resulting sample size was 1409.The primary outcome variable, number of malaria positive events, was right skewed with the majority (79.77%) of participants with 0 events and a mean of 0.32 with a sd of 0.80. The secondary outcome, the binary presence of a malaria diagnosis, was unbalanced with 20.23% of participants experiencing a malaria positive event over the time of the study. The majority of participants were female (59.62%), lived in traditional dwelling types (70.55%), and used an unprotected water source (57.63%). The majority of participants lived in the Nagongera sub-county (34.42%), followed by the Kihihi (33.57%), and Walakubua (32.01%) sub-counties. The slight majority of participants were in the least poor HWI category (35.91%), followed by the poorest (32.58%), and middle (31.51%) categories. The mean age was 11.26 years with a standard deviation of 14.68. The mean Anopheles count was 5.97 with a standard deviation of 27.91 Anopheles.  
+Model Results 
+
+## Primary Outcome
+  For the primary outcome, number of times a participant got malaria, the KNN model that performed the best was k = 96, with a test error of 0.8396. This model was used for comparison against the linear and LDA models. The MSE of regression was 0.81, of KNN was 0.84, and of LDA was 0.92. The RMSE of regression was 0.90, of KNN was 0.92, and of LDA was 0.95. The LDA of regression was 0.52, of KNN was 0.51, of LDA was 0.45. The weighted composite metric of linear regression was at 0.6939, LDA at 0.6942, and finally KNN at 0.698. 
+  Next, Decision Trees and Random Forests were applied to predict the primary outcome. To prune the tree with an optimal size, cross validation was used to determine th optimal level of tree complexity; the value of cost complexity parameter that results with the lowest deviance. The amount of nodes with the lowest deviance was 3. Therefore, the tree was pruned to a size of 3, which was used to predict the test data resulting in MSE 0.85, RMSE 0.92, and MAE 0.52. However, the variables "subcounty" and "dwelling" are important risk factors other than "age" and "Anapheles_count" over the other variables, so the decision tree does not provide fully explainable information. Random Forest was applied which resulted in MSE 0.82, RMS 0.91, and MAE 0.50. We also plotted two measures of variance importance; the first was based on the mean decrease of accuracy in predictions when a given variable is excluded from the model, and we saw that variables "age" and "subcounty" were the most relevant. The second plot was a measure of the total decrease in node purity. We saw that variables "age" and "Anopheles_count" were the most important the variables.
+  We chose to move forward with Random Forest model as it has the lowest weighted composite metric (0.68) compared to the other methods. The forward step wise Random Forest test error was the least using the variables "age", "subcounty", "sex", and "dwelling" with a test error rate 0.819. However the test error rate using all the predictors was about 0.821. As the errors using these different set of variables were very close and considering that "Anopheles_count" in reality affects the presence of positive malaria events (which was also shown in the variance importance plots in RF), we chose to move forward with the full model fit with all 7 predictors as we would like to consider the effect of all predictors on the outcome.
+
+## Secondary Outcome 
+  For the secondary outcome, the binary presence of malaria variable, the KNN model that preformed the best was k=21 with a test error of 0.217, this model is was used for comparison against the logistic, QDA, LDA, DT, and RF methods. The logistic and the QDA models both obtained the highest AUC of 0.72, followed by the LDA (AUC= 0.70) and the KNN model with k=21 (AUC=0.63). The DT and RF had the lowest AUC values; 0.5 and 0.52 respectively. And this was better understood when we looked at the confusion matrix of DT and RF. In detail, we saw that the sensitivity of DT and RF was 0% and 4.83%, respectively and specificity was 100% and 99.5%, respectively. Thus, both models did not perform very well predicting the actual malaria cases as there were around 62 and 59 false negative cases in Decision Trees and Random Forests, respectively; so the models failed to predict a high percentage of the malaria cases in the test data. The accuracy of both models was about 78%, but considering the small sample size and the imbalanced categories of the malaria presence, Decision Trees and Random Forests did not perform very well. 
+  We chose to move forward with the logistic regression model for model selection, as it is the simplest classification technique. The forward step wise logistic regression test errors all preformed equally as well with a test error of 0.22. We chose to move forward with the full model fit with all 7 predictors as we would like to consider the effect of all predictors on the outcome. 
+
+
+# Conclusion & Discussion  
+  By applying different machine learning methods to understand the effect on number positive malaria events and presence of malaria infection, we saw that Random Forest had the best performance predicting the number of positive malaria events as it had the lowest composite error metric compared to LDA, KNN, and DT. Random Forests also provided insights about the important variables associated with the outcome and it did a better job in capturing the non-linearity in the data; as it does not assume any linear relationship between the outcome and predictors. However, we believe that these methods would perform better with additional features and bigger sample size. 
+  Similarly, logistic regression performed the best in predicting malaria presence compared to QDA, LDA, KNN, Decision Trees, and Random Forests. We chose logistic regression as our final model as it had the highest AUC value among all. Regarding this secondary outcome, Decision Trees and Random Forest performed poorly in predicting the actual malaria cases. It was interesting to see the difference of performance of these parametric methods in predicting the primary and secondary outcomes, which we believe that the poor performance of these methods regarding predicting the secondary outcome was affected by the imbalance between the malaria cases.  
+  Although we used forward stepwise selection and the lowest resulting test error rate for feature selection, we used out intuition and previous literature to make decisions about final feature selection, for both primary and secondary outcomes. 
+  
+# Limitations and Future Work 
+  One of the limitations of this study is that the primary outcome (number of positive malaria events) was skewed to the right. Additionally, the categories of the secondary outcome (presence of Malaria events) was imbalanced; having 1124 no malaria cases and 285 malaria cases. Finally, the sample size was not large enough which could have improved the performance of the aforementioned methods. Future work might consider generating additional data such as conducting simulations and finding a robust method to handle unbalanced categories of the secondary outcome such undersampling/ovsersampling. Further, adding features to the dataset would improve the prediction of the aferomentioned methods. 
+
+# References
+
+1. Talisuna A, Adibaku S, Dorsey G, Kamya MR, Rosenthal PJ. Malaria in Uganda:
+Challenges to control on the long road to elimination. II. the path forward. Acta Trop.
+2012;121(3):196-201. doi:10.1016/j.actatropica.2011.06.013
+2. PRISM ICEMR Cohort. Clinical epidemiology database web site.
+https://l2.clinepidb.org/ce.legacy/app/record/dataset/DS_0ad509829e#category:topic-
+0219-synonym . Published 2018. Accessed November 16, 2022.
+3. An Introduction to Statistical Learning with Applications in R Second Edition (need full book title)
+
+```{r}
+setwd("~/Desktop/")
+data <- read.csv("ML_data2.csv")
+colnames(data)
+```
+
+```{r}
+data<- data%>%dplyr::select(-c("time_since_treatment", "time_at_risk", "medication_sum", "X"))
+data<-na.omit(data)
+data$malaria_binary<- as.factor(data$malaria_binary)
+
+```
+
+# Divide training and testing 
+```{r}
+set.seed(42)
+sample <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(0.8,0.2))
+mydata_train <- data[sample, ]
+mydata_test <- data[!sample, ]
+```
+
+# Summary statistics 
+```{r}
+hist(data$event2, xlab = "Number of Malaria Positive Events", main= "Frequency of Malaria Positive Events Per Person ")
+```
+```{r, message=FALSE}
+tabyl(data$sex)
+tabyl(data$dwelling)
+tabyl(data$hwi)
+tabyl(data$water)
+tabyl(data$subcounty)
+tabyl(data$malaria_binary)
+summary(data$age)
+summary(data$Anopheles_count)
+sd(data$Anopheles_count)
+summary(data$event2)
+sd(data$event2)
+summary(data$age)
+sd(data$age)
+
+```
+
+# Variable Selection for KNN - Continuous
+```{r}
+k_seq <- seq(from = 1, to = 100, by = 5)
+testerrorknn <- trainerrorknn <- NULL
+
+for(k in seq_along(k_seq)){
+  knnfit3 <- knnreg(event2 ~ hwi + water + subcounty + sex + 
+                      age + Anopheles_count + dwelling, 
+                      data = mydata_train, k = k)
+    predknn_te <- predict(knnfit3, newdata = mydata_test, type = "prob")
+    predknn_tr <- predict(knnfit3, newdata = mydata_train, type = "prob")
+  testerrorknn[k] <- mean((mydata_test$event2 - predknn_te)^2)
+  trainerrorknn[k] <- mean((mydata_train$event2 - predknn_tr)^2)
+}
+
+predictknn <- rbind(data.frame(k = k_seq, error = trainerrorknn, prob = "train"), 
+                    data.frame(k = k_seq, error = testerrorknn, prob = "test"))
+min(predictknn$error[predictknn$prob == "test"])
+# min = 0.8395821 or k = 96
+
+# Visualize Error
+ggplot(predictknn, mapping = aes(x = k, y = error,color = prob)) + 
+  geom_line() + 
+  geom_point(size = 1)
+```
+
+# Compare linear regression, KNN, and LDA models using MSE, RMSE, and MAE (primary outcome - number of positive malaria events)
+```{r}
+set.seed(0)
+
+# Linear Regression
+lmod <- lm(event2 ~ hwi + water + subcounty + sex + 
+             age + Anopheles_count + dwelling,
+           data = mydata_train)
+predlmod <- predict(lmod, newdata = mydata_test)
+MSElmod <-  mean((mydata_test$event2 - predlmod)^2)
+MSElmod
+RMSElmod <- sqrt(mean((mydata_test$event2 - predlmod)^2))
+RMSElmod
+MAElmod <- mean(abs(mydata_test$event2 - predlmod))
+MAElmod
+
+# KNN
+knnreg1 <- knnreg(event2 ~ hwi + water + subcounty + sex + 
+                    age + Anopheles_count + dwelling,
+           data = mydata_train, k = 96)
+predknn_te <- predict(knnreg1, newdata = mydata_test, type = "prob")
+MSEknn <- mean((mydata_test$event2 - predknn_te)^2)
+MSEknn
+RMSEknn <- sqrt(mean((mydata_test$event2 - predknn_te)^2))
+RMSEknn
+MAEknn <- mean(abs(mydata_test$event2 - predknn_te))
+MAEknn
+
+# LDA
+ldareg1 <- lda(event2 ~ hwi + water + subcounty + sex + 
+                 age + Anopheles_count + dwelling,
+           data = mydata_train)
+predlda1 <- predict(ldareg1, newdata = mydata_test)$posterior[ ,2]
+MSElda <- mean((mydata_test$event2 - predlda1)^2)
+MSElda
+RMSElda <- sqrt(mean((mydata_test$event2 - predlda1)^2))
+RMSElda
+MAElda <- mean(abs(mydata_test$event2 - predlda1))
+MAElda
+
+# Decision Trees
+#looking at the primary outcome using Decision Trees (with CV pruning))
+set.seed(2)
+mytree <- tree(event2 ~ sex+subcounty+age+dwelling+water+Anopheles_count+hwi, data = mydata_train)
+summary(mytree)
+
+plot(mytree)
+text(mytree)
+
+##compute test MSE
+yhat.test <- predict(mytree, newdata = mydata_test)
+mean((yhat.test-mydata_test$event2)^2) #0.8776845
+
+cv.mytree <- cv.tree(mytree)
+cv.df <- data.frame(size = cv.mytree$size, deviance = cv.mytree$dev)
+bestsize <- cv.mytree$size[which.min(cv.mytree$dev)] ##Get the best tree size (no. of leaf nodes)
+bestsize
+
+ggplot(cv.df, mapping = aes(x = size, y = deviance)) + 
+  geom_point(size = 3) + 
+  geom_line() +
+  geom_vline(xintercept = bestsize, col = "red") +
+  ggtitle("Cross Validation to select the optimal size of tree")
+
+prune.mytree <- prune.tree(mytree, best = bestsize) #Prune the tree to this size
+summary(prune.mytree)
+plot(prune.mytree)
+text(prune.mytree)
+
+##compute training MSE
+yhat.train <- predict(prune.mytree, newdata = mydata_train)
+mean((yhat.train-mydata_train$event2)^2) #0.5274877
+
+##compute test MSE, RMSE, MAE
+yhat.test <- predict(prune.mytree, newdata = mydata_test)
+MSEdt <- mean((yhat.test-mydata_test$event2)^2) #0.8466941
+RMSEdt <- sqrt(mean((mydata_test$event2 - yhat.test)^2)) #0.9201598
+MAEdt <- mean(abs(mydata_test$event2 - yhat.test)) #0.5196182
+
+# Random Forest
+Random.Forest <- randomForest(event2 ~ sex+subcounty+age+dwelling+water+Anopheles_count+hwi, 
+                       data = mydata_train, importance = TRUE)
+
+#compute training MSE
+yhat.rf.train <- predict(Random.Forest, newdata = mydata_train)
+mean((yhat.rf.train-mydata_train$event2)^2) #0.2969591
+
+#compute test MSE, RMSE, MAE
+yhat.rf.test <- predict(Random.Forest, newdata = mydata_test)
+MSErf <- mean((yhat.rf.test-mydata_test$event2)^2) #0.8235963
+RMSErf <- sqrt(mean((mydata_test$event2 - yhat.rf.test)^2)) #0.9075221
+MAErf <- mean(abs(mydata_test$event2 - yhat.rf.test)) #0.5032063
+
+importance(Random.Forest)
+varImpPlot(Random.Forest)
+
+# Compare the methods
+method <- c("Linear Reg", "KNN", "LDA", "DT", "RF")
+mae <- c(MAElmod, MAEknn, MAElda, MAEdt, MAErf)
+mse <- c(MSElmod, MSEknn, MSElda, MSEdt, MSErf)
+rmse <- c(RMSElmod, RMSEknn, RMSElda, RMSEdt, RMSErf)
+df <- data.frame(method, mse, rmse, mae)
+
+ggplot(df, aes(x = method)) +
+  geom_bar(aes(y = mse), stat = "identity", fill = "rosybrown2", alpha = 0.5) +
+  geom_text(aes(y = mse, label = round(mse, 2)), vjust = -0.5) +
+  geom_bar(aes(y = rmse), stat = "identity", fill = "plum3", alpha = 0.5) +
+  geom_text(aes(y = rmse, label = round(rmse, 2)), vjust = -0.5) +
+  geom_bar(aes(y = mae), stat = "identity", fill = "cadetblue3", alpha = 0.5) +
+  geom_text(aes(y = mae, label = round(mae, 2)), vjust = -0.5) +
+  xlab("Method") +
+  ylab("Error") +
+  ggtitle("Comparison of Linear Regression, KNN, and LDA Model Errors") +
+  theme_minimal()
+```
+
+# Generate weighted composite metric
+```{r}
+weights <- c(0.25, 0.25, 0.5)  
+df$composite_metric <- (weights[1] * df$mse) + 
+  (weights[2] * df$rmse) + (weights[3] * df$mae)
+head(df)
+```
+
+# Final regression model
+```{r}
+Random.Forest
+```
+
+# Regression forward stepwise selection
+```{r}
+# Perform Forward Fit on random forests 
+mod_formula_seq <- c("malaria_binary ~ age",
+                     "malaria_binary ~ age+subcounty",
+                    "malaria_binary ~ age+subcounty+sex",
+                    "malaria_binary ~ age+subcounty+sex+dwelling",
+                    "malaria_binary ~ age+subcounty+sex+dwelling+Anopheles_count",
+                    "malaria_binary ~ age+subcounty+sex+dwelling+Anopheles_count+water", 
+                    "malaria_binary ~ age+subcounty+sex+dwelling+Anopheles_count+water+hwi")
+
+sapply(mod_formula_seq, function(form){
+  mod <- as.formula(form)
+  fit <- randomForest(event2 ~ sex+subcounty+age+dwelling+water+Anopheles_count+hwi, 
+                       data = mydata_train, importance = TRUE)
+  pred_primary_out <- predict(fit, newdata = mydata_test)
+  mean((pred_primary_out-mydata_test$event2)^2) 
+})
+```
+# Compare logistic regression, KNN, QDA, LDA, DT, and RF models AUC/ROC curves - secondary outcome (presence of malaria infection)
+
+## Full model logistic regression 
+```{r}
+glm_malaria<-glm(malaria_binary~sex+subcounty+age+dwelling+water+Anopheles_count+hwi, family="binomial", data)
+summary(glm_malaria)
+predict_glm <- predict(glm_malaria, newdata = mydata_test, type = "response")
+roc_glm <- roc(mydata_test$malaria_binary, predict_glm)
+auc_glm <- auc(roc_glm) #0.7167
+```
+
+## KNN 
+```{r}
+k_sequence <- seq(from = 1, to = 100, by = 5)
+train_error <- test_error <- NULL
+for (i in seq_along(k_sequence)) {
+  fit <- knn3(malaria_binary~sex+subcounty+age+dwelling+water+Anopheles_count+hwi, data = mydata_train, k = k_sequence[i])
+  pred_label <- predict(fit, newdata = mydata_train, type = "class")
+  train_error[i] <- mean(pred_label != mydata_train$malaria_binary)
+  pred_label2 <- predict(fit, newdata = mydata_test, type = "class")
+  test_error[i] <- mean(pred_label2 != mydata_test$malaria_binary)
+}
+
+k_errors<-rbind(data.frame(k = k_sequence, error = train_error, class = "train"), data.frame(k = k_sequence, error = test_error, class = "test"))
+k_errors
+ggplot(k_errors, mapping = aes(x = k, y = error,color = class))+geom_line() + 
+geom_point(size = 1)
+
+k_errors%>%filter(class=="test")%>%slice(which.min(error)) # min error at k=16
+```
+
+Since the min error is at k = 21 we will use this model selection process for comparison
+
+```{r}
+fit_knn16 <- knn3(malaria_binary~sex+subcounty+age+dwelling+water+Anopheles_count+hwi, data = mydata_train, k = 21)
+predict_knn <- predict(fit_knn16, newdata = mydata_test, type = "prob")[ ,2]
+roc_knn <- roc(mydata_test$malaria_binary, predict_knn)
+auc_knn <- auc(roc_knn) #0.6339
+```
+
+
+## LDA
+```{r}
+lda_malaria<-lda(malaria_binary~sex+subcounty+age+dwelling+water+Anopheles_count+hwi, mydata_train)
+predict_lda <- predict(lda_malaria, newdata = mydata_test)$posterior[ ,2]
+roc_lda <- roc(mydata_test$malaria_binary, predict_lda)
+auc_lda <- auc(roc_lda) #0.6989
+```
+
+## QDA
+```{r}
+qda_malaria<-qda(malaria_binary~sex+subcounty+age+dwelling+water+Anopheles_count+hwi, mydata_train)
+predict_qda <- predict(qda_malaria, newdata = mydata_test)$posterior[ ,2]
+roc_qda <- roc(mydata_test$malaria_binary, predict_qda)
+auc_qda <- auc(roc_qda) #0.7176
+```
+
+## DT
+```{r}
+set.seed(2)
+mytree.bin <- tree(malaria_binary ~ sex+subcounty+age+dwelling+water+Anopheles_count+hwi, data =  mydata_train)
+summary(mytree.bin)
+
+#prunning the tree
+cv.tree <- cv.tree(mytree.bin)
+cv.df <- data.frame(size = cv.tree$size, deviance = cv.tree$dev)
+bestsize <- cv.tree$size[which.min(cv.tree$dev)] ##Get the best tree size (no. of leaf nodes)
+bestsize
+ggplot(cv.df, mapping = aes(x = size, y = deviance)) + 
+  geom_point(size = 3) + 
+  geom_line() +
+  geom_vline(xintercept = bestsize, col = "red") +
+  ggtitle("Gini Node Purity Selection")
+
+prune.mytree.bin <- prune.tree(mytree.bin, best = bestsize) ##Prune the tree to this size
+summary(prune.mytree.bin)
+plot(prune.mytree.bin)
+text(prune.mytree.bin)
+
+##compute AUC/ROC
+yhat.test <- predict(prune.mytree.bin, newdata = mydata_test, type = "class")
+roc_DT <- roc(as.numeric(mydata_test$malaria_binary), as.numeric(yhat.test))
+auc_DT <- auc(roc_DT) #0.5
+
+#confusion matrix
+cf_DT <- caret::confusionMatrix(data=yhat.test,
+                                reference=mydata_test$malaria_binary,
+                                positive = "1")
+cf_DT
+```
+
+## RF
+```{r}
+set.seed(1)
+Random.Forest <- randomForest(malaria_binary ~ sex+subcounty+age+dwelling+water+Anopheles_count+hwi, 
+                       data = mydata_train, importance = TRUE)
+
+importance(Random.Forest)
+varImpPlot(Random.Forest)
+
+#compute AUC/ROC
+yhat.rf.test <- predict(Random.Forest, newdata = mydata_test)
+roc_RF <- roc(as.numeric(mydata_test$malaria_binary), as.numeric(yhat.rf.test))
+auc_rf <- auc(roc_RF)
+
+#confusion matrix
+cf_RF <- caret::confusionMatrix(data=yhat.rf.test, reference=mydata_test$malaria_binary,
+                              positive = "1")
+cf_RF
+```
+
+# Visualization of the ROC curves with AUC
+```{r}
+rocgraphs <- list(Logistic = roc_glm, LDA = roc_lda, QDA = roc_qda, KNN16 = roc_knn, 
+                  DT = roc_DT, RF = roc_RF)
+titles <- paste(c("Logistic", "LDA", "QDA","KNN", "DT", "RF"),
+                     "AUC = ", round(c(auc_glm, auc_lda, auc_qda, auc_knn, auc_DT, auc_rf),2))
+ggroc(rocgraphs, size = 2, alpha = 0.5) + scale_color_discrete(labels = titles)
+```
+
+# Model selection on the logistic
+```{r}
+summary(glm_malaria)
+```
+
+```{r}
+mod_formula_seq <- c("malaria_binary ~ age",
+                     "malaria_binary ~ age+subcounty",
+                    "malaria_binary ~ age+subcounty+sex",
+                    "malaria_binary ~ age+subcounty+sex+dwelling",
+                    "malaria_binary ~ age+subcounty+sex+dwelling+Anopheles_count",
+                    "malaria_binary ~ age+subcounty+sex+dwelling+Anopheles_count+water", 
+                    "malaria_binary ~ age+subcounty+sex+dwelling+Anopheles_count+water+hwi")
+
+sapply(mod_formula_seq, function(form){
+  mod <- as.formula(form)
+  fit <- glm(mod, data = mydata_train, family = "binomial")
+  pred_sale_price <- predict(fit, newdata = mydata_test)
+  mean(pred_label != mydata_test$malaria_binary)
+})
+```
+
